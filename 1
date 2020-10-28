@@ -17,26 +17,13 @@ void setup()
   Serial.begin(9600);
 }
 
-void blinker()
-{
-  digitalWrite(8, LOW);
-  delay(8000);
-  digitalWrite(8, HIGH);
-  delay(5000);
-  digitalWrite(8, LOW);
-  delay(8000);
-  digitalWrite(8, HIGH);
-  delay(10000);
-  digitalWrite(8, LOW);
-  delay(180000);
-  digitalWrite(8, HIGH);
-}
 
 void loop()
 {
   EthernetClient client = server.available();
   if(client){
   boolean currentLineIsBlank = true;
+  unsigned long currentMillis = millis();
   while (client.connected()) {
     if (client.available()) {
       char c = client.read();
@@ -45,28 +32,51 @@ void loop()
         newInfo = 0;
       }
       
-      if(c == '$'){                                 
-                                                    
-        newInfo = 1;                                
+      if(c == '$'){
+        newInfo = 1;
       }
       
-                                                     
-      if(newInfo == 1){                              
+      if(newInfo == 1){
           Serial.println(c);
-          if(c == '1'){                              
+          if(c == '1'){
           Serial.println("ON");
-          digitalWrite(8, LOW);
-          blinker();
+          digitalWrite(8, HIGH);          
           }
           
-          if(c == '2'){                              
+          
+          if(c == '2'){
           Serial.println("OFF");
-          digitalWrite(8, HIGH);                     
+          digitalWrite(8, HIGH);
+          while(currentMillis - previusMillis > (interval * 8))
+          {
+            previusMillis = currentMillis;
+          };
+          digitalWrite(8, LOW);
+          while(currentMillis - previusMillis > (interval * 5))
+          {
+            previusMillis = currentMillis;
+          };
+          digitalWrite(8, HIGH);
+          while(currentMillis - previusMillis > (interval * 8))
+          {
+            previusMillis = currentMillis;
+          };
+          digitalWrite(8, LOW);
+          while(currentMillis - previusMillis > (interval * 10))
+          {
+            previusMillis = currentMillis;
+          };
+          digitalWrite(8, HIGH);
+          while(currentMillis - previusMillis > (interval * 210))
+          {
+            previusMillis = currentMillis;
+          };
+          digitalWrite(8, LOW);
           }    
       } 
       
-      if (c == '\n') {                              
-        currentLineIsBlank = true;                  
+      if (c == '\n') {
+        currentLineIsBlank = true;
       } 
       else if (c != '\r') {
         currentLineIsBlank = false;
@@ -80,8 +90,10 @@ void loop()
         client.println();
         client.println("<!DOCTYPE HTML>");
         client.println("<html>");
-        client.print("<title>Alarm</title>");
-        client.print("<H1>Block 1</H1>");
+        client.print("<title>Web Server</title>");
+        client.print("<H1>Web Server</H1>");
+        client.print("<a href=\"/$1\"><button>On</button></a>");
+        client.print("<a href=\"/$2\"><button>Off</button></a>");
         client.println("<br />");       
         client.println("</html>");
         break;
